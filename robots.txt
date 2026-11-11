@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://YOUR-DOMAIN.com/sitemap.xml
+Sitemap: https://skamaldev.github.io/neon-stack-master/sitemap.xml
