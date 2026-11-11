@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#07070f" />
+  <meta name="description" content="Neon Stack Master - Free addictive stack game. Tap to drop neon blocks, build combos, enter Fever Mode. Play instantly in browser. No download needed." />
+  <meta name="keywords" content="stack game, neon stack, free online game, hyper casual, block stack, endless game, mobile game, browser game" />
+  <meta name="author" content="Neon Stack Master" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://YOUR-DOMAIN.com/" />
+  <meta property="og:title" content="Neon Stack Master – Free Addictive Stack Game" />
+  <meta property="og:description" content="Tap to stack neon blocks. Perfect timing = big combos. Fever Mode multiplies your score. Play free now!" />
+  <meta property="og:image" content="https://YOUR-DOMAIN.com/og-image.png" />
+  <meta property="og:site_name" content="Neon Stack Master" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Neon Stack Master – Free Addictive Stack Game" />
+  <meta name="twitter:description" content="Tap. Stack. Perfect. Fever Mode. How high can you go?" />
+  <meta name="twitter:image" content="https://YOUR-DOMAIN.com/og-image.png" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2307070f'/><rect x='20' y='60' width='60' height='18' fill='%2300f5ff' rx='3'/><rect x='28' y='40' width='44' height='18' fill='%23ff00aa' rx='3'/><rect x='35' y='20' width='30' height='18' fill='%2300ff88' rx='3'/></svg>" />
+
+  <title>Neon Stack Master – Free Online Stack Game</title>
+
+  <style>
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #07070f;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: #fff;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #game-container {
+      position: relative;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(ellipse at 50% 30%, #1a1035 0%, #07070f 70%);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+    #ui {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      padding: calc(12px + var(--safe-top)) 14px calc(12px + var(--safe-bottom));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .score-box, .high-box, .streak-box {
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,255,255,0.22);
+      border-radius: 14px;
+      padding: 7px 12px;
+      text-align: center;
+      min-width: 72px;
+    }
+    .score-box .label, .high-box .label, .streak-box .label {
+      font-size: 9px;
+      opacity: 0.65;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .score-box .value {
+      font-size: clamp(22px, 6vw, 30px);
+      font-weight: 800;
+      color: #0ff;
+      text-shadow: 0 0 14px #0ff;
+      line-height: 1.15;
+    }
+    .high-box .value {
+      font-size: clamp(16px, 4.5vw, 20px);
+      font-weight: 700;
+      color: #f0f;
+      line-height: 1.15;
+    }
+    .streak-box .value {
+      font-size: clamp(16px, 4.5vw, 20px);
+      font-weight: 700;
+      color: #ff0;
+      line-height: 1.15;
+    }
+    .combo {
+      position: absolute;
+      top: calc(70px + var(--safe-top));
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(18px, 5vw, 26px);
+      font-weight: 900;
+      color: #ff0;
+      text-shadow: 0 0 18px #ff0;
+      opacity: 0;
+      transition: opacity 0.18s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .combo.show { opacity: 1; }
+    .fever-banner {
+      position: absolute;
+      top: calc(105px + var(--safe-top));
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #ff0, #f0f, #0ff);
+      background-size: 200% auto;
+      color: #000;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 5px 16px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+      animation: feverPulse 0.8s ease-in-out infinite alternate;
+    }
+    .fever-banner.show { opacity: 1; }
+    @keyframes feverPulse {
+      from { transform: translateX(-50%) scale(1); }
+      to { transform: translateX(-50%) scale(1.06); }
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(4,4,12,0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: auto;
+      z-index: 30;
+      transition: opacity 0.28s;
+      padding: 20px;
+      padding-top: calc(20px + var(--safe-top));
+      padding-bottom: calc(20px + var(--safe-bottom));
+      overflow-y: auto;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+    .title {
+      font-size: clamp(26px, 8vw, 44px);
+      font-weight: 900;
+      background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3.5s linear infinite;
+      margin-bottom: 6px;
+      text-align: center;
+      line-height: 1.15;
+    }
+    @keyframes shine { to { background-position: 200% center; } }
+    .subtitle {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .final-score {
+      font-size: clamp(44px, 13vw, 64px);
+      font-weight: 900;
+      color: #0ff;
+      text-shadow: 0 0 28px #0ff;
+      margin: 4px 0 2px;
+      transition: transform 0.15s;
+    }
+    .final-score.pop { transform: scale(1.12); }
+    .new-best {
+      color: #ff0;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .new-best.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .perfect-msg {
+      color: #ff0;
+      font-size: 14px;
+      margin-bottom: 6px;
+      min-height: 18px;
+      text-align: center;
+    }
+    .stats-row {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin: 8px 0 14px;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .stats-row span { white-space: nowrap; }
+    .btn {
+      background: linear-gradient(135deg, #00e5ff, #d500f9);
+      border: none;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      padding: 14px 36px;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 6px;
+      box-shadow: 0 0 22px rgba(0,229,255,0.45);
+      transition: transform 0.12s;
+      pointer-events: auto;
+      min-width: 200px;
+      max-width: 90vw;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn.secondary {
+      background: transparent;
+      border: 2px solid #0ff;
+      box-shadow: none;
+      font-size: 15px;
+      padding: 11px 28px;
+    }
+    .btn.reward {
+      background: linear-gradient(135deg, #ffaa00, #ff5500);
+      box-shadow: 0 0 20px rgba(255,170,0,0.4);
+      font-size: 15px;
+    }
+    .skin-row {
+      display: flex;
+      gap: 10px;
+      margin: 12px 0 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .skin-btn {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.12s, border-color 0.12s;
+    }
+    .skin-btn.active { border-color: #fff; transform: scale(1.12); }
+    .skin-btn.locked { opacity: 0.35; filter: grayscale(0.7); }
+    .instructions {
+      position: absolute;
+      bottom: calc(18px + var(--safe-bottom));
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .daily-badge {
+      background: linear-gradient(90deg, #ff0, #f0f);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+    .footer-links {
+      position: absolute;
+      bottom: calc(8px + var(--safe-bottom));
+      left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 11px;
+      opacity: 0.5;
+      pointer-events: auto;
+      z-index: 40;
+    }
+    .footer-links a {
+      color: #aaa;
+      text-decoration: none;
+    }
+    .footer-links a:hover { color: #0ff; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="c"></canvas>
+    <div id="ui">
+      <div class="top-bar">
+        <div class="score-box">
+          <div class="label">SCORE</div>
+          <div class="value" id="score">0</div>
+        </div>
+        <div class="streak-box" id="streakBox" style="display:none;">
+          <div class="label">STREAK</div>
+          <div class="value" id="streakVal">0</div>
+        </div>
+        <div class="high-box">
+          <div class="label">BEST</div>
+          <div class="value" id="high">0</div>
+        </div>
+      </div>
+      <div class="combo" id="combo">PERFECT x2</div>
+      <div class="fever-banner" id="feverBanner">🔥 FEVER MODE x2</div>
+    </div>
+
+    <div id="overlay">
+      <div class="daily-badge" id="dailyBadge" style="display:none;">DAILY CHALLENGE</div>
+      <div class="title" id="mainTitle">NEON STACK<br>MASTER</div>
+      <div class="subtitle" id="subTitle">Tap to drop • Perfect = Combo</div>
+      <div class="new-best" id="newBest">NEW BEST!</div>
+      <div class="perfect-msg" id="msg"></div>
+      <div class="final-score" id="finalScore" style="display:none;">0</div>
+      <div class="stats-row" id="statsRow" style="display:none;">
+        <span id="statCombo">Combo x0</span>
+        <span id="statPerfects">Perfects 0</span>
+      </div>
+
+      <button class="btn" id="playBtn">PLAY</button>
+      <button class="btn reward" id="continueBtn" style="display:none;">▶ CONTINUE (Watch Ad)</button>
+      <button class="btn secondary" id="dailyBtn">DAILY CHALLENGE</button>
+      <button class="btn secondary" id="shareBtn" style="display:none;">SHARE SCORE</button>
+
+      <div class="skin-row" id="skinRow"></div>
+      <div class="instructions">Tap / Click / Space to drop</div>
+    </div>
+
+    <div class="footer-links">
+      <a href="about.html">How to Play</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIG ====================
+    const CFG = {
+      blockH: 26,
+      startW: 150,
+      // Speed curve: starts slow, ramps smoothly
+      baseSpeed: 1.55,        // slower start
+      maxSpeed: 5.8,
+      speedInc: 0.065,        // gentle increase per block
+      perfectTol: 8,          // slightly more forgiving
+      minW: 16,
+      feverNeed: 6,
+      feverDuration: 12,
+      colors: ['#00f5ff', '#ff00aa', '#00ff88', '#ffee00', '#aa00ff', '#ff5500', '#00aaff', '#ff0088']
+    };
+
+    const SKINS = [
+      { id: 0, name: 'Neon', colors: CFG.colors, unlock: 0 },
+      { id: 1, name: 'Sunset', colors: ['#ff6b35','#f7c59f','#efefd0','#004e89','#1a659e'], unlock: 80 },
+      { id: 2, name: 'Ice', colors: ['#a0e9ff','#7bdff2','#b2f7ef','#eff7f6','#00bbf9'], unlock: 180 },
+      { id: 3, name: 'Toxic', colors: ['#39ff14','#0aff99','#00ffcc','#b8ff70','#7fff00'], unlock: 320 },
+      { id: 4, name: 'Gold', colors: ['#ffd700','#ffec8b','#ffb347','#ffaa00','#ffe066'], unlock: 500 }
+    ];
+
+    let canvas, ctx, W, H, dpr = 1;
+    let mode = 'menu';
+    let boxes = [];
+    let current = 0;
+    let score = 0;
+    let highScore = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let perfectCount = 0;
+    let xSpeed = CFG.baseSpeed;
+    let cameraY = 0;
+    let targetCameraY = 0;
+    let debris = null;
+    let particles = [];
+    let shake = 0;
+    let isDaily = false;
+    let dailySeed = 0;
+    let lastTime = 0;
+    let animId = null;
+    let fever = false;
+    let feverLeft = 0;
+    let canContinue = true;
+    let continued = false;
+    let currentSkin = 0;
+    let unlockedSkins = [0];
+    let dayStreak = 0;
+    let lastPlayDate = '';
+    let wasNewBest = false;
+
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function playTone(freq, dur, type = 'square', vol = 0.07) {
+      if (!audioCtx) return;
+      try {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+    function sfxPerfect() {
+      playTone(880, 0.07, 'sine', 0.09);
+      setTimeout(() => playTone(1320, 0.1, 'sine', 0.07), 50);
+    }
+    function sfxPlace() { playTone(420, 0.05, 'triangle', 0.06); }
+    function sfxFail() {
+      playTone(160, 0.22, 'sawtooth', 0.08);
+      setTimeout(() => playTone(110, 0.28, 'sawtooth', 0.06), 100);
+    }
+    function sfxFever() {
+      playTone(660, 0.1, 'sine', 0.1);
+      setTimeout(() => playTone(990, 0.12, 'sine', 0.09), 80);
+      setTimeout(() => playTone(1320, 0.15, 'sine', 0.08), 160);
+    }
+    function sfxClick() { playTone(580, 0.035, 'square', 0.05); }
+    function sfxNewBest() {
+      playTone(740, 0.1, 'sine', 0.1);
+      setTimeout(() => playTone(988, 0.12, 'sine', 0.09), 90);
+      setTimeout(() => playTone(1174, 0.18, 'sine', 0.08), 180);
+    }
+
+    function loadData() {
+      try {
+        highScore = parseInt(localStorage.getItem('nsm_high') || '0', 10);
+        currentSkin = parseInt(localStorage.getItem('nsm_skin') || '0', 10);
+        unlockedSkins = JSON.parse(localStorage.getItem('nsm_unlocked') || '[0]');
+        dayStreak = parseInt(localStorage.getItem('nsm_streak') || '0', 10);
+        lastPlayDate = localStorage.getItem('nsm_lastDate') || '';
+      } catch(e) {}
+      document.getElementById('high').textContent = highScore;
+      updateStreakUI();
+    }
+    function saveHigh() {
+      if (score > highScore) {
+        highScore = score;
+        wasNewBest = true;
+        try { localStorage.setItem('nsm_high', highScore); } catch(e) {}
+        document.getElementById('high').textContent = highScore;
+      }
+      SKINS.forEach(s => {
+        if (highScore >= s.unlock && !unlockedSkins.includes(s.id)) {
+          unlockedSkins.push(s.id);
+        }
+      });
+      try { localStorage.setItem('nsm_unlocked', JSON.stringify(unlockedSkins)); } catch(e) {}
+    }
+    function saveSkin(id) {
+      currentSkin = id;
+      try { localStorage.setItem('nsm_skin', id); } catch(e) {}
+    }
+    function updateDayStreak() {
+      const today = new Date().toISOString().slice(0, 10);
+      if (lastPlayDate === today) return;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (lastPlayDate === yesterday) dayStreak++;
+      else dayStreak = 1;
+      lastPlayDate = today;
+      try {
+        localStorage.setItem('nsm_streak', dayStreak);
+        localStorage.setItem('nsm_lastDate', today);
+      } catch(e) {}
+      updateStreakUI();
+    }
+    function updateStreakUI() {
+      const box = document.getElementById('streakBox');
+      if (dayStreak > 0) {
+        box.style.display = 'block';
+        document.getElementById('streakVal').textContent = dayStreak;
+      }
+    }
+
+    function getColors() {
+      return SKINS[currentSkin] ? SKINS[currentSkin].colors : CFG.colors;
+    }
+    function randColor(i) {
+      const cols = getColors();
+      if (isDaily) {
+        const s = (dailySeed + i * 17) % cols.length;
+        return cols[s];
+      }
+      return cols[Math.floor(Math.random() * cols.length)];
+    }
+    function getTodaySeed() {
+      const d = new Date();
+      return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    }
+
+    // Smooth speed based on how many blocks placed
+    function getCurrentSpeed() {
+      const level = Math.max(0, current - 1);
+      const spd = CFG.baseSpeed + level * CFG.speedInc;
+      return Math.min(spd, CFG.maxSpeed);
+    }
+
+    function spawnParticles(x, y, color, count = 16) {
+      for (let i = 0; i < count; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const sp = 1.8 + Math.random() * 5;
+        particles.push({
+          x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.8,
+          life: 1, color, size: 2 + Math.random() * 3.5
+        });
+      }
+    }
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.14; p.life -= 0.028;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + cameraY, p.size * p.life, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function resetGame(daily = false, keepHeight = false) {
+      isDaily = daily;
+      dailySeed = daily ? getTodaySeed() : 0;
+      wasNewBest = false;
+      if (!keepHeight) {
+        boxes = [];
+        current = 0;
+        score = 0;
+        combo = 0;
+        maxCombo = 0;
+        perfectCount = 0;
+        cameraY = 0;
+        targetCameraY = 0;
+        canContinue = true;
+        continued = false;
+        fever = false;
+        feverLeft = 0;
+        document.getElementById('feverBanner').classList.remove('show');
+        boxes.push({ x: (W - CFG.startW) / 2, y: 0, w: CFG.startW, color: '#2a2a3a' });
+        current = 1;
+      }
+      xSpeed = getCurrentSpeed() * (current % 2 === 0 ? 1 : -1);
+      if (daily) xSpeed *= 1.05;
+      debris = null;
+      particles = [];
+      shake = 0;
+      document.getElementById('score').textContent = score;
+      document.getElementById('combo').classList.remove('show');
+      newBox();
+      mode = 'bounce';
+      updateDayStreak();
+    }
+
+    function newBox() {
+      const prev = boxes[current - 1];
+      const w = fever ? Math.min(prev.w + 6, CFG.startW + 16) : prev.w;
+      boxes[current] = {
+        x: 0,
+        y: prev.y + CFG.blockH,
+        w: w,
+        color: fever ? '#ffee00' : randColor(current),
+        moving: true
+      };
+      const spd = getCurrentSpeed();
+      xSpeed = spd * (current % 2 === 0 ? 1 : -1);
+    }
+
+    function drop() {
+      if (mode !== 'bounce') return;
+      mode = 'fall';
+      sfxClick();
+    }
+
+    function land() {
+      const curr = boxes[current];
+      const prev = boxes[current - 1];
+      const left = Math.max(curr.x, prev.x);
+      const right = Math.min(curr.x + curr.w, prev.x + prev.w);
+      const overlap = right - left;
+
+      if (overlap <= 0) {
+        gameOver();
+        return;
+      }
+
+      const diff = curr.x - prev.x;
+      if (Math.abs(diff) < CFG.perfectTol) {
+        curr.x = prev.x;
+        curr.w = prev.w;
+        combo++;
+        perfectCount++;
+        maxCombo = Math.max(maxCombo, combo);
+        let pts = 10 + combo * 5;
+        if (fever) pts *= 2;
+        score += pts;
+        spawnParticles(curr.x + curr.w / 2, H - (curr.y + cameraY) - CFG.blockH / 2, curr.color, fever ? 28 : 18);
+        shake = fever ? 11 : 7;
+        sfxPerfect();
+        showCombo();
+        if (!fever && combo >= CFG.feverNeed) {
+          fever = true;
+          feverLeft = CFG.feverDuration;
+          sfxFever();
+          document.getElementById('feverBanner').classList.add('show');
+        }
+      } else {
+        combo = 0;
+        curr.x = left;
+        curr.w = overlap;
+        score += fever ? 8 : 5;
+        sfxPlace();
+        if (diff > 0) debris = { x: prev.x, w: diff, y: curr.y, color: curr.color, life: 1 };
+        else debris = { x: right, w: -diff, y: curr.y, color: curr.color, life: 1 };
+        if (fever) {
+          fever = false;
+          feverLeft = 0;
+          document.getElementById('feverBanner').classList.remove('show');
+        }
+      }
+
+      if (curr.w < CFG.minW) {
+        gameOver();
+        return;
+      }
+
+      if (fever) {
+        feverLeft--;
+        if (feverLeft <= 0) {
+          fever = false;
+          document.getElementById('feverBanner').classList.remove('show');
+        }
+      }
+
+      document.getElementById('score').textContent = score;
+      saveHigh();
+
+      if (curr.y > H * 0.42) targetCameraY = curr.y - H * 0.42;
+
+      current++;
+      newBox();
+      mode = 'bounce';
+    }
+
+    function gameOver() {
+      mode = 'over';
+      sfxFail();
+      saveHigh();
+      showOverlay(true);
+    }
+
+    function showCombo() {
+      const el = document.getElementById('combo');
+      el.textContent = combo > 1 ? `PERFECT x${combo}` : 'PERFECT!';
+      if (fever) el.textContent += ' 🔥';
+      el.classList.add('show');
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove('show'), 650);
+    }
+
+    // Animated score count-up
+    function animateScore(target) {
+      const el = document.getElementById('finalScore');
+      el.style.display = 'block';
+      let current = 0;
+      const duration = Math.min(900, 350 + target * 2);
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        current = Math.round(target * ease);
+        el.textContent = current;
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = target;
+          el.classList.add('pop');
+          setTimeout(() => el.classList.remove('pop'), 180);
+          if (wasNewBest) {
+            document.getElementById('newBest').classList.add('show');
+            sfxNewBest();
+          }
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function draw() {
+      ctx.fillStyle = fever ? 'rgba(20,10,0,0.32)' : 'rgba(7,7,15,0.38)';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.save();
+      if (shake > 0) {
+        ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+        shake *= 0.82;
+        if (shake < 0.4) shake = 0;
+      }
+
+      for (let i = 0; i < boxes.length; i++) {
+        const b = boxes[i];
+        const y = H - b.y - CFG.blockH + cameraY;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = fever ? 26 : 16;
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, y, b.w, CFG.blockH);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(b.x + 2, y + 2, Math.max(0, b.w - 4), 5);
+      }
+
+      if (debris) {
+        const y = H - debris.y - CFG.blockH + cameraY;
+        ctx.globalAlpha = debris.life;
+        ctx.fillStyle = debris.color;
+        ctx.fillRect(debris.x, y, debris.w, CFG.blockH);
+        ctx.globalAlpha = 1;
+        debris.y -= 7;
+        debris.life -= 0.045;
+        if (debris.life <= 0) debris = null;
+      }
+
+      drawParticles();
+      ctx.restore();
+    }
+
+    function update() {
+      if (mode === 'bounce') {
+        const b = boxes[current];
+        b.x += xSpeed * (fever ? 1.12 : 1);
+        if (b.x + b.w > W) { b.x = W - b.w; xSpeed = -Math.abs(xSpeed); }
+        else if (b.x < 0) { b.x = 0; xSpeed = Math.abs(xSpeed); }
+      } else if (mode === 'fall') {
+        const b = boxes[current];
+        b.y -= fever ? 11 : 9;
+        const prev = boxes[current - 1];
+        if (b.y <= prev.y + CFG.blockH) {
+          b.y = prev.y + CFG.blockH;
+          land();
+        }
+      }
+      cameraY += (targetCameraY - cameraY) * 0.09;
+      updateParticles();
+    }
+
+    function loop(ts) {
+      if (!lastTime) lastTime = ts;
+      lastTime = ts;
+      if (mode === 'bounce' || mode === 'fall') {
+        update();
+        draw();
+      }
+      animId = requestAnimationFrame(loop);
+    }
+
+    function getMotivatingMsg() {
+      if (wasNewBest) return '';
+      if (highScore > 0 && score >= highScore * 0.9) return 'So close to your best!';
+      if (maxCombo >= 5) return 'Amazing combo run!';
+      if (perfectCount >= 8) return 'Great precision!';
+      if (score >= 100) return 'Nice height!';
+      if (score >= 40) return 'Good effort!';
+      return 'Nice try!';
+    }
+
+    function showOverlay(isOver) {
+      const ov = document.getElementById('overlay');
+      ov.classList.remove('hidden');
+      document.getElementById('dailyBadge').style.display = isDaily ? 'block' : 'none';
+      document.getElementById('newBest').classList.remove('show');
+
+      if (isOver) {
+        document.getElementById('mainTitle').innerHTML = 'GAME OVER';
+        document.getElementById('subTitle').textContent = getMotivatingMsg();
+        document.getElementById('msg').textContent = '';
+        document.getElementById('statsRow').style.display = 'flex';
+        document.getElementById('statCombo').textContent = maxCombo > 0 ? `Combo x${maxCombo}` : 'Combo x0';
+        document.getElementById('statPerfects').textContent = `Perfects ${perfectCount}`;
+        document.getElementById('playBtn').textContent = 'PLAY AGAIN';
+        document.getElementById('shareBtn').style.display = 'inline-block';
+        document.getElementById('continueBtn').style.display = (canContinue && !continued) ? 'inline-block' : 'none';
+        animateScore(score);
+      } else {
+        document.getElementById('mainTitle').innerHTML = 'NEON STACK<br>MASTER';
+        document.getElementById('subTitle').textContent = 'Tap to drop • Perfect = Combo';
+        document.getElementById('finalScore').style.display = 'none';
+        document.getElementById('msg').textContent = '';
+        document.getElementById('statsRow').style.display = 'none';
+        document.getElementById('playBtn').textContent = 'PLAY';
+        document.getElementById('shareBtn').style.display = 'none';
+        document.getElementById('continueBtn').style.display = 'none';
+      }
+      renderSkins();
+    }
+
+    function hideOverlay() {
+      document.getElementById('overlay').classList.add('hidden');
+    }
+
+    function renderSkins() {
+      const row = document.getElementById('skinRow');
+      row.innerHTML = '';
+      SKINS.forEach(s => {
+        const unlocked = unlockedSkins.includes(s.id);
+        const btn = document.createElement('div');
+        btn.className = 'skin-btn' + (currentSkin === s.id ? ' active' : '') + (!unlocked ? ' locked' : '');
+        btn.style.background = `linear-gradient(135deg, ${s.colors[0]}, ${s.colors[2] || s.colors[1]})`;
+        btn.title = unlocked ? s.name : `Unlock at ${s.unlock}`;
+        if (unlocked) {
+          btn.onclick = () => {
+            saveSkin(s.id);
+            renderSkins();
+            sfxClick();
+          };
+        }
+        row.appendChild(btn);
+      });
+    }
+
+    function onInput(e) {
+      if (e) e.preventDefault();
+      initAudio();
+      if (mode === 'bounce') drop();
+    }
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function init() {
+      canvas = document.getElementById('c');
+      ctx = canvas.getContext('2d');
+      resize();
+      loadData();
+      renderSkins();
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+
+      canvas.addEventListener('pointerdown', onInput, { passive: false });
+      canvas.addEventListener('touchstart', onInput, { passive: false });
+      window.addEventListener('keydown', e => {
+        if (e.code === 'Space' || e.code === 'Enter') {
+          e.preventDefault();
+          onInput(e);
+        }
+      });
+
+      document.getElementById('playBtn').addEventListener('click', () => {
+        initAudio();
+        hideOverlay();
+        resetGame(false);
+        if (!animId) loop(0);
+      });
+
+      document.getElementById('dailyBtn').addEventListener('click', () => {
+        initAudio();
+        hideOverlay();
+        resetGame(true);
+        if (!animId) loop(0);
+      });
+
+      document.getElementById('continueBtn').addEventListener('click', () => {
+        // TODO: Replace with real Adsterra Rewarded Ad
+        initAudio();
+        continued = true;
+        canContinue = false;
+        hideOverlay();
+        mode = 'bounce';
+        if (boxes.length > current) boxes.length = current;
+        newBox();
+        sfxClick();
+      });
+
+      document.getElementById('shareBtn').addEventListener('click', () => {
+        const text = `I scored ${score} in Neon Stack Master! 🔥 Max combo x${maxCombo}${isDaily ? ' (Daily)' : ''}${dayStreak > 1 ? ` | ${dayStreak}-day streak` : ''}\nPlay free: ${window.location.origin}`;
+        if (navigator.share) {
+          navigator.share({ title: 'Neon Stack Master', text, url: window.location.href }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(text).then(() => {
+            document.getElementById('msg').textContent = 'Score copied!';
+          }).catch(() => alert(text));
+        }
+      });
+
+      mode = 'menu';
+      showOverlay(false);
+      ctx.fillStyle = '#07070f';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    init();
+  </script>
+</body>
+</html>
