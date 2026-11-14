@@ -1,74 +1,38 @@
-# Neon Stack Master – Web Game Package
+# Neon Stack Master — updated website package
 
-Complete static website ready for free hosting + Adsterra monetization.
+Static HTML5 Canvas game and supporting pages. No build step or API key is required.
 
-## Files Included
+## Files
+- `index.html` — game, accessible page content, SEO metadata
+- `about.html` — gameplay instructions
+- `privacy.html` — current project privacy disclosure
+- `terms.html` — terms of use
+- `robots.txt` and `sitemap.xml` — crawler files for the published GitHub Pages URL
+- `manifest.webmanifest` — basic install metadata
 
-| File | Purpose |
-|------|---------|
-| `index.html` | Main game + landing page (SEO ready) |
-| `about.html` | How to Play page |
-| `privacy.html` | Privacy Policy (required by Adsterra & Google) |
-| `terms.html` | Terms of Service |
-| `robots.txt` | Search engine crawl rules |
-| `sitemap.xml` | Sitemap for Google Search Console |
-| `manifest.webmanifest` | Add-to-Home-Screen / future PWA support |
+## Publish to the existing GitHub Pages repository
+1. Back up/download the current repository first.
+2. Upload/replace these files in the repository root (keep the existing repository name `neon-stack-master`).
+3. Commit the changes to the branch/folder configured in GitHub Pages.
+4. Wait for deployment, then check the homepage, `/about.html`, `/privacy.html`, `/terms.html`, `/robots.txt`, and `/sitemap.xml`.
 
-## Free Hosting Options (Recommended)
+Canonical site URL: https://skamaldev.github.io/neon-stack-master/
 
-1. **GitHub Pages** (best for long term)
-   - Create a new public repository
-   - Upload all files
-   - Settings → Pages → Deploy from main branch
-   - Your site will be at `https://username.github.io/repo-name/`
+## Search Console
+1. Add the URL-prefix property `https://skamaldev.github.io/neon-stack-master/`.
+2. Verify ownership using the HTML tag Google provides; add that exact meta tag inside `<head>` in `index.html`, commit, then click Verify.
+3. Submit `sitemap.xml` and inspect the homepage with URL Inspection. Indexing is not guaranteed.
 
-2. **Netlify** (very easy + free SSL)
-   - Drag & drop the folder at netlify.com/drop
-   - Or connect GitHub repo
+## Adsterra integration — not yet enabled
+This package intentionally contains **no Adsterra publisher script**. Do not paste random scripts from tutorials. First add the site in your own Adsterra publisher account, wait for approval, choose a suitable ad format, and copy the exact code from your dashboard. Share that code if you want help placing it safely. Start with one clearly-labelled, non-intrusive placement outside the game controls. Do not represent a normal banner as a rewarded ad. The in-game Continue button is a free continuation, not an ad reward.
 
-3. **Cloudflare Pages**
-4. **InfinityFree / other free web hosts** (good for Adsterra approval sometimes)
+Before enabling ads, update the privacy disclosure and implement any consent mechanism required for the actual ad provider and target regions. Check the provider's current publisher terms and GitHub Pages acceptable-use rules.
 
-## Before Going Live
+## Social preview image
+A social preview image has not been included. Create and add a real 1200×630 PNG and then add matching `og:image` and `twitter:image` metadata before relying on rich social previews.
 
-1. Replace every `YOUR-DOMAIN.com` with your real domain in:
-   - `index.html` (Open Graph & Twitter meta tags)
-   - `robots.txt`
-   - `sitemap.xml`
-
-2. Create a simple `og-image.png` (1200×630 recommended) showing the game title + neon blocks. Place it in the root folder.
-
-3. Add Adsterra ads:
-   - Banner or Native in non-intrusive places
-   - Interstitial on "Play Again"
-   - **Rewarded** on the Continue button (best revenue)
-
-## Google Indexing Steps
-
-1. Go to [Google Search Console](https://search.google.com/search-console)
-2. Add your property (domain or URL prefix)
-3. Submit `sitemap.xml`
-4. Request indexing for the homepage
-
-## Free Traffic Ideas
-
-- Share score feature (already built – uses native share)
-- Post short clips on TikTok / Reels / Shorts (“Can you beat my score?”)
-- Reddit: r/WebGames, r/incremental_games, r/somethingiswrongwiththisgame etc.
-- Discord gaming servers
-- Make a simple “Daily Challenge” post every day
-
-## Future Play Store Path
-
-Because the game is pure HTML5 + Canvas, you can later wrap it with:
-- Capacitor
-- Cordova
-- or PWA Builder
-
-and publish as a TWA / Android app when you have budget and traction.
-
-## Notes
-
-- All progress is saved in browser localStorage (no backend needed)
-- Fully responsive and mobile-first
-- No external dependencies – works offline after first load
+## Important notes
+- Game progress is stored in browser localStorage and is device/browser-specific.
+- The game uses Pointer Events for canvas input to avoid handling the same touch twice through both pointer and touch listeners.
+- The game animation loop runs only while a game round is active.
+- Test on real mobile and desktop browsers after deployment.

@@ -2,7 +2,7 @@
   "name": "Neon Stack Master",
   "short_name": "Neon Stack",
   "description": "Free addictive neon block stacking game. Tap, perfect, fever mode!",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#07070f",
   "theme_color": "#07070f",
